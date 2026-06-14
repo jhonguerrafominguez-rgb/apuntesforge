@@ -16,10 +16,23 @@ if not os.path.exists(CARPETA_SUBIDAS):
 Ruta principal inicial:
 @app.route('/')
 def inicio():
-    return render_template('inicio.html')
-Servidor:
-if __name__ == '__main__':
-    app.run(debug=True)
+    busqueda = request.args.get('buscar', '').strip()
+    
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    
+    query = "SELECT * FROM apuntes WHERE 1=1"
+    parametros = []
+    
+    if busqueda:
+        query += " AND (titulo LIKE ? OR materia LIKE ?)"
+        parametros.extend([f'%{busqueda}%', f'%{busqueda}%'])
+    
+    cursor.execute(query, parametros)
+    todos_los_apuntes = cursor.fetchall()
+    conexion.close()
+    
+    return render_template('inicio.html', apuntes=todos_los_apuntes, busqueda=busqueda)
 
 
 
@@ -96,3 +109,5 @@ def subir_apunte():
         return redirect(url_for('inicio'))
     
     return render_template('subir_apunte.html')
+
+
