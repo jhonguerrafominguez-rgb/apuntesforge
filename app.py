@@ -110,4 +110,7 @@ def subir_apunte():
     
     return render_template('subir_apunte.html')
 
+@app.route('/descargar/<filename>')
+def descargar_archivo(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
