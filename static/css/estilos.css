@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://googleapis.com');
 
 :root {
     --bg-principal: #020617;
@@ -9,12 +9,6 @@
     --indigo: #4f46e5;
     --indigo-brillante: #6366f1;
     --oro: #eab308;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -71,7 +65,6 @@ body {
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-    display: inline-block;
 }
 
 .btn-principal:hover {
@@ -123,6 +116,46 @@ body {
 .hero p {
     color: var(--texto-gris);
     font-size: 1rem;
+}
+
+.kpi-panel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background-color: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--borde-suave);
+    border-radius: 16px;
+    padding: 1.2rem;
+    text-align: center;
+}
+
+.kpi-item:not(:last-child) {
+    border-right: 1px solid var(--borde-suave);
+}
+
+.kpi-numero {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.kpi-numero.indigo {
+    color: var(--indigo-brillante);
+}
+
+.kpi-numero.violeta {
+    color: #a78bfa;
+}
+
+.kpi-numero.oro {
+    color: var(--oro);
+}
+
+.kpi-etiqueta {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
 }
 
 .buscador-formulario {
@@ -219,7 +252,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    h: 3px;
     background: linear-gradient(to right, var(--indigo), #7c3aed);
 }
 
@@ -275,30 +308,4 @@ body {
     background-color: rgba(244, 63, 94, 0.1);
     color: #fb7185;
     border: 1px solid rgba(244, 63, 94, 0.2);
-}
-
-@media (max-width: 768px) {
-    .tarjeta-apunte {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .tarjeta-derecha {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .btn-principal, .btn-estrella {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .buscador-formulario {
-        flex-direction: column;
-    }
-    
-    .hero h1 {
-        font-size: 1.8rem;
-    }
 }
