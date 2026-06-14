@@ -11,13 +11,21 @@ html
 
 <body>
 
-html
-<form method="GET" action="/" class="buscador-formulario">
-    <input type="text" name="buscar" value="{{ busqueda }}" placeholder="Buscar asignatura o palabra clave..." class="buscador-input">
-    <button type="submit" class="btn-principal">Buscar</button>
-    <a href="/descargar/{{ apunte.archivo_nombre }}" class="btn-principal">⬇️ Descargar</a>
 
-</form>
+    <form action="{{ url_for('dar_estrella', apunte_id=apunte.id) }}" method="POST" style="margin: 0;">
+        <button type="submit" class="btn-estrella">
+            ⭐ <span>{{ apunte.estrellas }}</span>
+        </button>
+    </form>
+
+    html
+    <form method="GET" action="/" class="buscador-formulario">
+        <input type="text" name="buscar" value="{{ busqueda }}" placeholder="Buscar asignatura o palabra clave..."
+            class="buscador-input">
+        <button type="submit" class="btn-principal">Buscar</button>
+        <a href="/descargar/{{ apunte.archivo_nombre }}" class="btn-principal">⬇️ Descargar</a>
+
+    </form>
 
 
     <nav class="navbar">

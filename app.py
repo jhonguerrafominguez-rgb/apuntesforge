@@ -114,3 +114,15 @@ def subir_apunte():
 def descargar_archivo(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
+@app.route('/estrella/<int:apunte_id>', methods=['POST'])
+def dar_estrella(apunte_id):
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    cursor.execute('UPDATE apuntes SET estrellas = estrellas + 1 WHERE id = ?', (apunte_id,))
+    conexion.commit()
+    conexion.close()
+    return redirect(request.referrer or url_for('inicio'))
+Actualizar la consulta en inicio():
+
+python
+query += " ORDER BY estrellas DESC, id DESC"
