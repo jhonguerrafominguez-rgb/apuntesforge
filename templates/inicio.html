@@ -1,32 +1,14 @@
-html
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApuntesForge --- Catálogo de Recursos Gratis</title>
+    <title>ApuntesForge — Catálogo de Recursos Gratis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
 
 <body>
-
-
-    <form action="{{ url_for('dar_estrella', apunte_id=apunte.id) }}" method="POST" style="margin: 0;">
-        <button type="submit" class="btn-estrella">
-            ⭐ <span>{{ apunte.estrellas }}</span>
-        </button>
-    </form>
-
-    html
-    <form method="GET" action="/" class="buscador-formulario">
-        <input type="text" name="buscar" value="{{ busqueda }}" placeholder="Buscar asignatura o palabra clave..."
-            class="buscador-input">
-        <button type="submit" class="btn-principal">Buscar</button>
-        <a href="/descargar/{{ apunte.archivo_nombre }}" class="btn-principal">⬇️ Descargar</a>
-
-    </form>
-
 
     <nav class="navbar">
         <div class="nav-contenedor">
@@ -34,11 +16,43 @@ html
             <a href="/subir" class="btn-principal">⚡ Subir Documento</a>
         </div>
     </nav>
+
     <main class="contenedor">
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+        {% for categoria, mensaje in mensajes %}
+        <div class="alerta {% if categoria == 'exito' %}alerta-exito{% else %}alerta-error{% endif %}">
+            {{ mensaje }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         <div class="hero">
             <h1>El Hub Universitario</h1>
             <p>Acceso abierto e ilimitado a los mejores resúmenes compartidos por la comunidad.</p>
         </div>
+
+        <div class="kpi-panel">
+            <div class="kpi-item">
+                <p class="kpi-numero indigo">100%</p>
+                <p class="kpi-etiqueta">Gratuito</p>
+            </div>
+            <div class="kpi-item">
+                <p class="kpi-numero violeta">SQLite</p>
+                <p class="kpi-etiqueta">Base de Datos</p>
+            </div>
+            <div class="kpi-item">
+                <p class="kpi-numero oro">★</p>
+                <p class="kpi-etiqueta">Votos en Vivo</p>
+            </div>
+        </div>
+
+        <form method="GET" action="/" class="buscador-formulario">
+            <input type="text" name="buscar" value="{{ busqueda }}" placeholder="Buscar asignatura o palabra clave..."
+                class="buscador-input">
+            <button type="submit" class="btn-principal">Buscar</button>
+        </form>
 
         <div class="lista-apuntes">
             {% if apuntes %}
@@ -52,9 +66,15 @@ html
                     <h3 class="tarjeta-titulo">{{ apunte.titulo }}</h3>
                     <p class="tarjeta-autor">Por: {{ apunte.autor }}</p>
                 </div>
+
                 <div class="tarjeta-derecha">
-                    <span class="btn-estrella" style="opacity: 0.7;">⭐ <span>{{ apunte.estrellas }}</span></span>
-                    <a href="#" class="btn-principal" style="opacity: 0.5; cursor: not-allowed;">⬇️ Descargar</a>
+                    <!-- Botón de estrellas estructurado como formulario para mandar el voto -->
+                    <form action="{{ url_for('dar_estrella', apunte_id=apunte.id) }}" method="POST" style="margin: 0;">
+                        <button type="submit" class="btn-estrella">
+                            ⭐ <span>{{ apunte.estrellas }}</span>
+                        </button>
+                    </form>
+                    <a href="/descargar/{{ apunte.archivo_nombre }}" class="btn-principal">⬇️ Descargar</a>
                 </div>
             </div>
             {% endfor %}
@@ -65,6 +85,7 @@ html
             {% endif %}
         </div>
     </main>
+
 </body>
 
 </html>

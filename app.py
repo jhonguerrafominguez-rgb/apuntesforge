@@ -7,34 +7,11 @@ app = Flask(__name__)
 app.secret_key = 'clave_secreta_para_apuntes_forge'
 
 CARPETA_SUBIDAS = os.path.join('static', 'apuntes_pdf')
-
 app.config['UPLOAD_FOLDER'] = CARPETA_SUBIDAS
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 
 if not os.path.exists(CARPETA_SUBIDAS):
     os.makedirs(CARPETA_SUBIDAS)
-Ruta principal inicial:
-@app.route('/')
-def inicio():
-    busqueda = request.args.get('buscar', '').strip()
-    
-    conexion = conectar_bd()
-    cursor = conexion.cursor()
-    
-    query = "SELECT * FROM apuntes WHERE 1=1"
-    parametros = []
-    
-    if busqueda:
-        query += " AND (titulo LIKE ? OR materia LIKE ?)"
-        parametros.extend([f'%{busqueda}%', f'%{busqueda}%'])
-    
-    cursor.execute(query, parametros)
-    todos_los_apuntes = cursor.fetchall()
-    conexion.close()
-    
-    return render_template('inicio.html', apuntes=todos_los_apuntes, busqueda=busqueda)
-
-
 
 def conectar_bd():
     conexion = sqlite3.connect('apuntes.db')
@@ -44,7 +21,7 @@ def conectar_bd():
 def inicializar_bd():
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    
+    # Tabla actualizada: sin precio, con columna de likes (estrellas)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS apuntes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +35,7 @@ def inicializar_bd():
     ''')
     
     cursor.execute('SELECT COUNT(*) FROM apuntes')
-    if cursor.fetchone()[0] == 0:
+    if cursor.fetchone() == 0:
         datos_semilla = [
             ("Resumen Primer Parcial - Cálculo Integral", "Cálculo II", "Ciencias Básicas", "Carlos Mendoza", "ejemplo_calculo.pdf", 12),
             ("Guía Completa de Programación Orientada a Objetos", "Programación I", "Ingeniería", "Laura Restrepo", "ejemplo_poo.pdf", 24)
@@ -68,12 +45,38 @@ def inicializar_bd():
             VALUES (?, ?, ?, ?, ?, ?)
         ''', datos_semilla)
         conexion.commit()
-    
     conexion.close()
 
+# IMPORTANTÍSIMO: Borra el archivo 'apuntes.db' viejo de tu carpeta antes de correr esto 
+# para que se genere la estructura nueva correctamente.
+inicializar_bd()
 
-
-
+@app.route('/')
+def inicio():
+    busqueda = request.args.get('buscar', '').strip()
+    categoria_filtro = request.args.get('categoria', '').strip()
+    
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    
+    query = "SELECT * FROM apuntes WHERE 1=1"
+    parametros = []
+    
+    if busqueda:
+        query += " AND (titulo LIKE ? OR materia LIKE ?)"
+        parametros.extend([f'%{busqueda}%', f'%{busqueda}%'])
+        
+    if categoria_filtro:
+        query += " AND categoria = ?"
+        parametros.append(categoria_filtro)
+        
+    query += " ORDER BY estrellas DESC, id DESC" # Destaca los apuntes con más estrellas primero
+    
+    cursor.execute(query, parametros)
+    todos_los_apuntes = cursor.fetchall()
+    conexion.close()
+    
+    return render_template('inicio.html', apuntes=todos_los_apuntes, busqueda=busqueda, categoria_actual=categoria_filtro)
 
 @app.route('/subir', methods=['GET', 'POST'])
 def subir_apunte():
@@ -87,11 +90,11 @@ def subir_apunte():
         if not (titulo and materia and categoria and autor and archivo):
             flash('Todos los campos son obligatorios.', 'error')
             return redirect(url_for('subir_apunte'))
-        
+            
         if archivo.filename == '':
             flash('Archivo no válido.', 'error')
             return redirect(url_for('subir_apunte'))
-        
+
         nombre_seguro = secure_filename(archivo.filename)
         ruta_guardado = os.path.join(app.config['UPLOAD_FOLDER'], nombre_seguro)
         archivo.save(ruta_guardado)
@@ -107,13 +110,10 @@ def subir_apunte():
         
         flash('¡Material compartido con éxito!', 'exito')
         return redirect(url_for('inicio'))
-    
+        
     return render_template('subir_apunte.html')
 
-@app.route('/descargar/<filename>')
-def descargar_archivo(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
-
+# NUEVA RUTA: Sistema interactivo para reaccionar con estrellas
 @app.route('/estrella/<int:apunte_id>', methods=['POST'])
 def dar_estrella(apunte_id):
     conexion = conectar_bd()
@@ -122,7 +122,13 @@ def dar_estrella(apunte_id):
     conexion.commit()
     conexion.close()
     return redirect(request.referrer or url_for('inicio'))
-Actualizar la consulta en inicio():
 
-python
-query += " ORDER BY estrellas DESC, id DESC"
+@app.route('/descargar/<filename>')
+def descargar_archivo(filename):
+    if filename in ["ejemplo_calculo.pdf", "ejemplo_poo.pdf"]:
+        flash('Modo Demostración: Los archivos subidos por ti sí se descargarán de forma real.', 'info')
+        return redirect(url_for('inicio'))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
